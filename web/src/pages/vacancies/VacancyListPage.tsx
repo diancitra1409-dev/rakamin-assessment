@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { vacanciesApi } from "@/services/vacancies";
-import { Plus, Briefcase, ChevronRight } from "lucide-react";
+import { Plus, Briefcase, ChevronRight, Trash2 } from "lucide-react"; // Tambah ikon Trash2 jika ingin dipakai
 import type { Vacancy } from "@/types";
 
 export default function VacancyListPage() {
@@ -20,6 +20,23 @@ export default function VacancyListPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Tambahkan fungsi handleDelete di sini
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation(); // Mencegah Card ikut ter-klik dan pindah halaman
+    
+    if (!window.confirm("Are you sure you want to delete this vacancy?")) return;
+
+    try {
+      // Panggil API untuk menghapus data
+      await vacanciesApi.delete(id); 
+      // Update state langsung agar barisnya hilang tanpa perlu refresh browser
+      setVacancies(vacancies.filter(v => v.id !== id));
+    } catch (err) {
+      console.error("Failed to delete vacancy", err);
+      alert("Failed to delete vacancy. Please try again.");
+    }
+  };
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -59,7 +76,19 @@ export default function VacancyListPage() {
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
                   <p className="font-medium text-sm">{v.role_title}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                
+                {/* Modifikasi bagian kanan Card untuk tombol Delete */}
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={(e) => handleDelete(e, v.id)}
+                  >
+                    Delete
+                  </Button>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+                
               </CardContent>
             </Card>
           ))}

@@ -41,6 +41,22 @@ export default function AssessmentListPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Fungsi untuk menangani proses hapus assessment
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation(); // Mencegah Card ikut ter-klik dan pindah halaman
+    
+    if (!window.confirm("Are you sure you want to delete this assessment?")) return;
+
+    try {
+      await assessmentsApi.delete(id);
+      // Update state langsung agar barisnya hilang dari layar
+      setAssessments(assessments.filter((a) => a.id !== id));
+    } catch (err) {
+      console.error("Failed to delete assessment", err);
+      alert("Failed to delete assessment. Please try again.");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -91,7 +107,18 @@ export default function AssessmentListPage() {
                     )}
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                
+                {/* Modifikasi bagian kanan Card untuk tombol Delete */}
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={(e) => handleDelete(e, a.id)}
+                  >
+                    Delete
+                  </Button>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               </CardContent>
             </Card>
           ))}
